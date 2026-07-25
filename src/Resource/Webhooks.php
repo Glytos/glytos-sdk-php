@@ -101,7 +101,7 @@ final class Webhooks extends AbstractResource
         ?int $limit = null,
         ?int $offset = null,
     ): array {
-        return (array) $this->client->request(
+        $resp = $this->client->request(
             'GET',
             '/webhooks/deliveries',
             null,
@@ -112,6 +112,9 @@ final class Webhooks extends AbstractResource
                 'offset' => $offset,
             ],
         );
+
+        // Deliveries are paginated ({items, total, ...}); return the items.
+        return \is_array($resp) && \array_key_exists('items', $resp) ? (array) $resp['items'] : (array) $resp;
     }
 
     /**

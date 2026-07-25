@@ -30,7 +30,10 @@ final class Calls extends AbstractResource
      */
     public function list(array $query = []): array
     {
-        return (array) $this->client->request('GET', '/calls', null, $query);
+        $resp = $this->client->request('GET', '/calls', null, $query);
+
+        // The calls endpoint is paginated ({items, total, ...}); return the items.
+        return \is_array($resp) && \array_key_exists('items', $resp) ? (array) $resp['items'] : (array) $resp;
     }
 
     /**
