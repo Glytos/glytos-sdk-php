@@ -6,9 +6,15 @@ namespace Glytos;
 
 use Glytos\Exception\ApiException;
 use Glytos\Exception\InvalidArgumentException;
+use Glytos\Resource\Analytics;
 use Glytos\Resource\Calls;
+use Glytos\Resource\Campaigns;
+use Glytos\Resource\Chat;
+use Glytos\Resource\KnowledgeBase;
 use Glytos\Resource\PhoneNumbers;
 use Glytos\Resource\Sessions;
+use Glytos\Resource\Tools;
+use Glytos\Resource\VectorStores;
 use Glytos\Resource\Webhooks;
 use Glytos\Resource\Workflows;
 use Http\Discovery\Psr17FactoryDiscovery;
@@ -41,6 +47,12 @@ final class Client
     public readonly PhoneNumbers $phoneNumbers;
     public readonly Sessions $sessions;
     public readonly Webhooks $webhooks;
+    public readonly Campaigns $campaigns;
+    public readonly Chat $chat;
+    public readonly Tools $tools;
+    public readonly KnowledgeBase $knowledgeBase;
+    public readonly VectorStores $vectorStores;
+    public readonly Analytics $analytics;
 
     private readonly string $apiKey;
     private readonly string $baseUrl;
@@ -81,6 +93,12 @@ final class Client
         $this->phoneNumbers = new PhoneNumbers($this);
         $this->sessions = new Sessions($this);
         $this->webhooks = new Webhooks($this);
+        $this->campaigns = new Campaigns($this);
+        $this->chat = new Chat($this);
+        $this->tools = new Tools($this);
+        $this->knowledgeBase = new KnowledgeBase($this);
+        $this->vectorStores = new VectorStores($this);
+        $this->analytics = new Analytics($this);
     }
 
     /**

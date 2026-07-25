@@ -66,4 +66,62 @@ final class PhoneNumbers extends AbstractResource
     {
         return $this->client->request('DELETE', '/telephony/numbers/' . rawurlencode($numberUuid));
     }
+
+    /**
+     * The telephony providers you can use (platform and your connected carriers).
+     *
+     * @return array<mixed>
+     */
+    public function providers(): array
+    {
+        return (array) $this->client->request('GET', '/telephony/providers');
+    }
+
+    /**
+     * Import a number you already own with a carrier (BYO). Requires the carrier
+     * credentials; ownership is verified before the number is attached.
+     *
+     * @param array<string, mixed>|null $credentials Carrier credentials for the import.
+     *
+     * @return array<mixed>
+     */
+    public function importNumber(
+        string $e164,
+        ?string $provider = null,
+        ?string $providerSid = null,
+        ?array $credentials = null,
+        ?string $workflowUuid = null,
+    ): array {
+        $body = ['e164' => $e164];
+        if ($provider !== null) {
+            $body['provider'] = $provider;
+        }
+        if ($providerSid !== null) {
+            $body['provider_sid'] = $providerSid;
+        }
+        if ($credentials !== null) {
+            $body['credentials'] = $credentials;
+        }
+        if ($workflowUuid !== null) {
+            $body['workflow_uuid'] = $workflowUuid;
+        }
+
+        return (array) $this->client->request('POST', '/telephony/numbers/import', $body);
+    }
+
+    /**
+     * Provision an instant platform number. Selection is passed as query parameters,
+     * not a body.
+     *
+     * @return array<mixed>
+     */
+    public function instant(?string $country = null, ?string $provider = null): array
+    {
+        return (array) $this->client->request(
+            'POST',
+            '/telephony/numbers/instant',
+            null,
+            ['country' => $country, 'provider' => $provider],
+        );
+    }
 }

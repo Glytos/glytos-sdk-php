@@ -77,6 +77,109 @@ final class ClientTest extends TestCase
         }
     }
 
+    public function testPromoteSendsTargetEnvironmentId(): void
+    {
+        $http = $this->recordingClient(new Response(200, [], '{"uuid":"wf_1"}'));
+        $client = $this->client($http);
+
+        $client->workflows->promote('wf_1', 'env_prod');
+
+        self::assertNotNull($http->lastRequest);
+        self::assertSame('POST', $http->lastRequest->getMethod());
+        self::assertStringEndsWith('/workflows/wf_1/promote', (string) $http->lastRequest->getUri());
+        self::assertSame(
+            ['target_environment_id' => 'env_prod'],
+            json_decode((string) $http->lastRequest->getBody(), true),
+        );
+    }
+
+    public function testUpdateConfigSendsPutWithConfig(): void
+    {
+        $http = $this->recordingClient(new Response(200, [], '{"uuid":"wf_1"}'));
+        $client = $this->client($http);
+
+        $client->workflows->updateConfig('wf_1', ['voice' => ['provider' => 'openai']]);
+
+        self::assertNotNull($http->lastRequest);
+        self::assertSame('PUT', $http->lastRequest->getMethod());
+        self::assertStringEndsWith('/workflows/wf_1/config', (string) $http->lastRequest->getUri());
+        self::assertSame(
+            ['config' => ['voice' => ['provider' => 'openai']]],
+            json_decode((string) $http->lastRequest->getBody(), true),
+        );
+    }
+
+    public function testInstantSendsQueryParametersNotABody(): void
+    {
+        $http = $this->recordingClient(new Response(200, [], '{"uuid":"num_1"}'));
+        $client = $this->client($http);
+
+        $client->phoneNumbers->instant('US');
+
+        self::assertNotNull($http->lastRequest);
+        self::assertSame('POST', $http->lastRequest->getMethod());
+        self::assertSame('country=US', $http->lastRequest->getUri()->getQuery());
+        self::assertSame('', (string) $http->lastRequest->getBody());
+        self::assertSame('', $http->lastRequest->getHeaderLine('Content-Type'));
+    }
+
+    public function testCampaignsCreateSerializesBody(): void
+    {
+        $http = $this->recordingClient(new Response(200, [], '{"uuid":"camp_1"}'));
+        $client = $this->client($http);
+
+        $client->campaigns->create('Q3 Outreach', 'wf_1', '+15550001111');
+
+        self::assertNotNull($http->lastRequest);
+        self::assertSame('POST', $http->lastRequest->getMethod());
+        self::assertStringEndsWith('/telephony/campaigns', (string) $http->lastRequest->getUri());
+        self::assertSame(
+            ['name' => 'Q3 Outreach', 'workflow_uuid' => 'wf_1', 'from_number' => '+15550001111'],
+            json_decode((string) $http->lastRequest->getBody(), true),
+        );
+    }
+
+    public function testToolsUpdateSendsPatchWithOnlyProvidedFields(): void
+    {
+        $http = $this->recordingClient(new Response(200, [], '{"uuid":"tool_1"}'));
+        $client = $this->client($http);
+
+        $client->tools->update('tool_1', name: 'Renamed');
+
+        self::assertNotNull($http->lastRequest);
+        self::assertSame('PATCH', $http->lastRequest->getMethod());
+        self::assertStringEndsWith('/tools/tool_1', (string) $http->lastRequest->getUri());
+        self::assertSame(['name' => 'Renamed'], json_decode((string) $http->lastRequest->getBody(), true));
+    }
+
+    public function testKnowledgeBaseSearchSerializesBody(): void
+    {
+        $http = $this->recordingClient(new Response(200, [], '{"results":[]}'));
+        $client = $this->client($http);
+
+        $client->knowledgeBase->search('refund policy', topK: 3);
+
+        self::assertNotNull($http->lastRequest);
+        self::assertSame('POST', $http->lastRequest->getMethod());
+        self::assertStringEndsWith('/knowledge-base/search', (string) $http->lastRequest->getUri());
+        self::assertSame(
+            ['query' => 'refund policy', 'top_k' => 3],
+            json_decode((string) $http->lastRequest->getBody(), true),
+        );
+    }
+
+    public function testAnalyticsOverviewSendsDaysQuery(): void
+    {
+        $http = $this->recordingClient(new Response(200, [], '{}'));
+        $client = $this->client($http);
+
+        $client->analytics->overview(30);
+
+        self::assertNotNull($http->lastRequest);
+        self::assertSame('GET', $http->lastRequest->getMethod());
+        self::assertStringEndsWith('/analytics/overview?days=30', (string) $http->lastRequest->getUri());
+    }
+
     /**
      * @param ClientInterface&object{lastRequest: ?RequestInterface} $http
      */

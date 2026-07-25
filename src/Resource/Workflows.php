@@ -12,11 +12,14 @@ final class Workflows extends AbstractResource
     /**
      * List your agents (prompt agents and visual workflows).
      *
+     * @param array<string, mixed> $query Optional filters, e.g. `archived` (bool) or
+     *                                    `environment` (`"all"`, a kind, or an env uuid).
+     *
      * @return array<mixed>
      */
-    public function list(): array
+    public function list(array $query = []): array
     {
-        return (array) $this->client->request('GET', '/workflows');
+        return (array) $this->client->request('GET', '/workflows', null, $query);
     }
 
     /**
@@ -101,6 +104,188 @@ final class Workflows extends AbstractResource
             'GET',
             '/workflows/' . rawurlencode($workflowUuid)
                 . '/sessions/' . rawurlencode($sessionUuid) . '/events',
+        );
+    }
+
+    /**
+     * Rename an agent.
+     *
+     * @return array<mixed>
+     */
+    public function rename(string $workflowUuid, string $name): array
+    {
+        return (array) $this->client->request(
+            'PATCH',
+            '/workflows/' . rawurlencode($workflowUuid),
+            ['name' => $name],
+        );
+    }
+
+    /**
+     * Duplicate an agent, returning the new copy.
+     *
+     * @return array<mixed>
+     */
+    public function duplicate(string $workflowUuid): array
+    {
+        return (array) $this->client->request(
+            'POST',
+            '/workflows/' . rawurlencode($workflowUuid) . '/duplicate',
+        );
+    }
+
+    /**
+     * Archive an agent.
+     *
+     * @return array<mixed>
+     */
+    public function archive(string $workflowUuid): array
+    {
+        return (array) $this->client->request(
+            'POST',
+            '/workflows/' . rawurlencode($workflowUuid) . '/archive',
+        );
+    }
+
+    /**
+     * Restore an archived agent.
+     *
+     * @return array<mixed>
+     */
+    public function unarchive(string $workflowUuid): array
+    {
+        return (array) $this->client->request(
+            'POST',
+            '/workflows/' . rawurlencode($workflowUuid) . '/unarchive',
+        );
+    }
+
+    /**
+     * Promote an agent to another environment (a move, not a copy).
+     *
+     * @return array<mixed>
+     */
+    public function promote(string $workflowUuid, string $targetEnvironmentId): array
+    {
+        return (array) $this->client->request(
+            'POST',
+            '/workflows/' . rawurlencode($workflowUuid) . '/promote',
+            ['target_environment_id' => $targetEnvironmentId],
+        );
+    }
+
+    /**
+     * List the saved versions of an agent.
+     *
+     * @return array<mixed>
+     */
+    public function versions(string $workflowUuid): array
+    {
+        return (array) $this->client->request(
+            'GET',
+            '/workflows/' . rawurlencode($workflowUuid) . '/versions',
+        );
+    }
+
+    /**
+     * Replace the visual-workflow graph definition.
+     *
+     * @param array<string, mixed> $graph
+     *
+     * @return array<mixed>
+     */
+    public function updateDefinition(string $workflowUuid, array $graph): array
+    {
+        return (array) $this->client->request(
+            'PUT',
+            '/workflows/' . rawurlencode($workflowUuid) . '/definition',
+            ['graph' => $graph],
+        );
+    }
+
+    /**
+     * Replace the agent config (voice, model, behaviour, ...).
+     *
+     * @param array<string, mixed> $config
+     *
+     * @return array<mixed>
+     */
+    public function updateConfig(string $workflowUuid, array $config): array
+    {
+        return (array) $this->client->request(
+            'PUT',
+            '/workflows/' . rawurlencode($workflowUuid) . '/config',
+            ['config' => $config],
+        );
+    }
+
+    /**
+     * Start a conversation session with an agent.
+     *
+     * @param array<string, mixed>|null $variables Initial session variables.
+     * @param int|string|null           $version   A specific agent version to run.
+     *
+     * @return array<mixed>
+     */
+    public function startSession(
+        string $workflowUuid,
+        ?array $variables = null,
+        int|string|null $version = null,
+    ): array {
+        $body = [];
+        if ($variables !== null) {
+            $body['variables'] = $variables;
+        }
+        if ($version !== null) {
+            $body['version'] = $version;
+        }
+
+        return (array) $this->client->request(
+            'POST',
+            '/workflows/' . rawurlencode($workflowUuid) . '/sessions',
+            $body,
+        );
+    }
+
+    /**
+     * Send a message in a session and get the assistant's reply for that turn.
+     *
+     * @param list<string>|null $images Image data URIs or URLs for the current turn.
+     *
+     * @return array<mixed>
+     */
+    public function sendMessage(
+        string $workflowUuid,
+        string $sessionUuid,
+        string $content,
+        ?array $images = null,
+    ): array {
+        $body = ['content' => $content];
+        if ($images !== null) {
+            $body['images'] = $images;
+        }
+
+        return (array) $this->client->request(
+            'POST',
+            '/workflows/' . rawurlencode($workflowUuid)
+                . '/sessions/' . rawurlencode($sessionUuid) . '/messages',
+            $body,
+        );
+    }
+
+    /**
+     * Run a one-shot text conversation against an agent.
+     *
+     * @param list<array<string, mixed>> $messages Chat messages, e.g. `[['role' => 'user', 'content' => 'Hi']]`.
+     *
+     * @return array<mixed>
+     */
+    public function runText(string $workflowUuid, array $messages): array
+    {
+        return (array) $this->client->request(
+            'POST',
+            '/workflows/' . rawurlencode($workflowUuid) . '/runs/text',
+            ['messages' => $messages],
         );
     }
 }
