@@ -122,6 +122,51 @@ final class Workflows extends AbstractResource
     }
 
     /**
+     * Export an agent as portable, secret-free JSON.
+     *
+     * It imports back through `$glytos->imports->create('glytos', ...)`, on this
+     * account or another.
+     *
+     * @return array<mixed>
+     */
+    public function export(string $workflowUuid): array
+    {
+        return (array) $this->client->request(
+            'GET',
+            '/workflows/' . rawurlencode($workflowUuid) . '/export',
+        );
+    }
+
+    /**
+     * File an agent into a folder. Both must be in the same environment.
+     *
+     * @return array<mixed>
+     */
+    public function moveToFolder(string $workflowUuid, string $folderUuid): array
+    {
+        return (array) $this->client->request(
+            'PATCH',
+            '/workflows/' . rawurlencode($workflowUuid),
+            ['folder_uuid' => $folderUuid],
+        );
+    }
+
+    /**
+     * Take an agent out of its folder, leaving it ungrouped.
+     *
+     * @return array<mixed>
+     */
+    public function removeFromFolder(string $workflowUuid): array
+    {
+        // Sent as null is what unfiles it; not sent at all would leave it where it is.
+        return (array) $this->client->request(
+            'PATCH',
+            '/workflows/' . rawurlencode($workflowUuid),
+            ['folder_uuid' => null],
+        );
+    }
+
+    /**
      * Duplicate an agent, returning the new copy.
      *
      * @return array<mixed>

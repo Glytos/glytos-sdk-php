@@ -88,11 +88,28 @@ $glytos->threads->runs->create($thread, 'Rate this transcript', null, 'Score 1-5
 
 | Namespace | Methods |
 | --- | --- |
-| `$glytos->workflows` | `list`, `retrieve`, `create`, `publish`, `delete`, `templates`, `session`, `sessionEvents` |
+| `$glytos->agents` (alias `workflows`) | `list`, `retrieve`, `create`, `rename`, `publish`, `promote`, `duplicate`, `archive`, `delete`, `templates`, `export`, `moveToFolder`, `removeFromFolder`, `versions`, `startSession`, `sendMessage`, `streamMessage`, `runText` |
+| `$glytos->threads` | `create`, `retrieve`, `messages->create`, `messages->list`, `runs->create`, `runs->stream` |
+| `$glytos->folders` | `list`, `create`, `rename`, `delete` |
+| `$glytos->imports` | `sources`, `create`, `assistant` |
+| `$glytos->chat` | `token`, `messages`, `stream`, `uploadFile` |
 | `$glytos->calls` | `create`, `list`, `retrieve`, `webToken`, `control` |
 | `$glytos->phoneNumbers` | `search`, `list`, `provision`, `assign`, `release` |
+| `$glytos->knowledgeBase` | `listDocuments`, `createDocument`, `uploadDocument`, `search` |
+| `$glytos->vectorStores` | `list`, `create`, `retrieve`, `delete`, `uploadDocument` |
 | `$glytos->sessions` | `list` |
 | `$glytos->webhooks` | `list`, `create`, `delete`, `events`, `verify` |
+
+`agents` and `workflows` are the same resource under two names: the product calls
+them agents, the API path is `/workflows`. Either works.
+
+### Text and voice are separate
+
+An agent is one definition. Nothing forces it to do both:
+
+- A **text** agent needs only `threads` (or `chat` for a browser widget).
+- A **voice** agent adds `calls`, `phoneNumbers` and `campaigns`.
+- The same agent can do both, if you want it to.
 
 Any endpoint without a dedicated helper is one call away with
 `$glytos->request($method, $path, $body, $query)`.

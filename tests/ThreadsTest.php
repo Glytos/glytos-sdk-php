@@ -131,6 +131,25 @@ final class ThreadsTest extends TestCase
         self::assertSame(['assistant' => ['name' => 'Support']], $this->body($http->lastRequest));
     }
 
+    public function testAgentExportAndFolderFiling(): void
+    {
+        $http = $this->recordingClient(new Response(200, [], '{}'));
+        $client = $this->client($http);
+
+        $client->agents->export('wf_1');
+        self::assertNotNull($http->lastRequest);
+        self::assertSame('GET', $http->lastRequest->getMethod());
+        self::assertStringEndsWith('/workflows/wf_1/export', (string) $http->lastRequest->getUri());
+
+        $client->agents->moveToFolder('wf_1', 'fld_1');
+        self::assertSame('PATCH', $http->lastRequest->getMethod());
+        self::assertSame(['folder_uuid' => 'fld_1'], $this->body($http->lastRequest));
+
+        // Sent as null is what unfiles an agent; not sent would leave it where it is.
+        $client->agents->removeFromFolder('wf_1');
+        self::assertSame('{"folder_uuid":null}', (string) $http->lastRequest->getBody());
+    }
+
     public function testUploadIsMultipartNotJson(): void
     {
         $http = $this->recordingClient(new Response(200, [], '{"file_uuid":"f_1"}'));

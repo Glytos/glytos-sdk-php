@@ -15,7 +15,9 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Per-turn `$instructions` on every text turn.
 - File uploads: `chat->uploadFile`, `knowledgeBase->uploadDocument`,
   `vectorStores->uploadDocument`, plus `Client::upload()` for any other endpoint.
-- `folders` and `imports` resources.
+- `folders` and `imports` resources, plus `agents->moveToFolder` /
+  `agents->removeFromFolder` to file an agent and `agents->export` for the
+  portable, secret-free JSON that imports back.
 - `agents` as an alias of `workflows`.
 
 ## [0.1.0] - 2026-07-19
