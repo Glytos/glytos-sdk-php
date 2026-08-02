@@ -67,4 +67,19 @@ final class KnowledgeBase extends AbstractResource
 
         return (array) $this->client->request('POST', '/knowledge-base/search', $body);
     }
+
+    /**
+     * Upload a document file (txt, md, pdf) instead of pasting its text.
+     *
+     * @return array<mixed>
+     */
+    public function uploadDocument(string $content, string $filename = 'document'): array
+    {
+        return (array) $this->client->upload(
+            '/knowledge-base/documents/upload',
+            [],
+            $filename,
+            $content,
+        );
+    }
 }

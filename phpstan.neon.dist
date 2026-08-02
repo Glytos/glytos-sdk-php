@@ -1,9 +1,0 @@
-parameters:
-    level: 5
-    paths:
-        - src
-    # The optional Laravel bridge extends Illuminate\* classes that ship with the
-    # framework, not this package (illuminate/support is a "suggest", so it is not
-    # installed in CI). Analyse it only where Laravel is present, not here.
-    excludePaths:
-        - src/Laravel

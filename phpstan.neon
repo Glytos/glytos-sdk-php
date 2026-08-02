@@ -1,9 +1,0 @@
-parameters:
-    level: 8
-    paths:
-        - src
-    excludePaths:
-        # Optional framework glue: it references Laravel classes that are not a
-        # dependency of this SDK, so it is analysed by the application that installs it
-        # (which has the framework and its PHPStan extension).
-        - src/Laravel

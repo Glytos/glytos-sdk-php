@@ -257,19 +257,37 @@ final class Workflows extends AbstractResource
     public function sendMessage(
         string $workflowUuid,
         string $sessionUuid,
-        string $content,
+        string $content = '',
         ?array $images = null,
+        ?string $instructions = null,
     ): array {
-        $body = ['content' => $content];
-        if ($images !== null) {
-            $body['images'] = $images;
-        }
-
         return (array) $this->client->request(
             'POST',
             '/workflows/' . rawurlencode($workflowUuid)
                 . '/sessions/' . rawurlencode($sessionUuid) . '/messages',
-            $body,
+            ThreadRef::turnBody($content, $images, $instructions),
+        );
+    }
+
+    /**
+     * The same turn, delivered as it is written.
+     *
+     * @param list<string>|null $images
+     *
+     * @return \Generator<int, \Glytos\StreamEvent>
+     */
+    public function streamMessage(
+        string $workflowUuid,
+        string $sessionUuid,
+        string $content = '',
+        ?array $images = null,
+        ?string $instructions = null,
+    ): \Generator {
+        return $this->client->stream(
+            'POST',
+            '/workflows/' . rawurlencode($workflowUuid)
+                . '/sessions/' . rawurlencode($sessionUuid) . '/messages/stream',
+            ThreadRef::turnBody($content, $images, $instructions),
         );
     }
 

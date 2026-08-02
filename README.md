@@ -56,6 +56,34 @@ $glytos = new Client('gly_...', environment: 'prod');
 $overview = $glytos->request('GET', '/analytics/overview');
 ```
 
+### Text conversations
+
+An agent is one definition; nothing forces it to do both text and voice. For text,
+a thread holds the conversation and a run is one turn on it:
+
+```php
+$thread = $glytos->threads->create($agentUuid);
+$run = $glytos->threads->runs->create($thread, 'What are your opening hours?');
+echo end($run['messages'])['content'];
+```
+
+Stream a long answer instead of waiting for it:
+
+```php
+foreach ($glytos->threads->runs->stream($thread, 'Summarise the policy') as $event) {
+    if ($event->type === 'token') {
+        echo $event->delta;
+    }
+}
+```
+
+Extra context for one turn only, applied below the agent's own instructions and
+never saved to it:
+
+```php
+$glytos->threads->runs->create($thread, 'Rate this transcript', null, 'Score 1-5, reply as JSON.');
+```
+
 ## Resources
 
 | Namespace | Methods |
